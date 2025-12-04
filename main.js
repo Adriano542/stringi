@@ -12,85 +12,131 @@ const opisy = [
   'Metoda replace(ciag_szukany, zamieniony) służy do zamiany szukanych kawałków tekstu na inny tekst, możemy używać wyrażeń regularnych',
 ];
 
-// Mapowanie nazw metod na indeks opisu
+// mapowanie
 const map = {
-  length: 0,
-  charAt: 1,
-  charCodeAt: 2,
-  toUpperCase: 3,
-  toLowerCase: 4,
-  indexOf: 5,
-  lastIndexOf: 6,
-  substr: 7,
-  substring: 8,
-  slice: 9,
-  replace: 10
+  length: 0, charAt: 1, charCodeAt: 2, toUpperCase: 3, toLowerCase: 4,
+  indexOf: 5, lastIndexOf: 6, substr: 7, substring: 8, slice: 9, replace: 10
 };
 
+function parseNumbersFromRaw(raw) {
+  if (!raw) return [];
+  // dopuszczamy dowolne oddzielenie spacją
+  return raw.trim().split(/\s+/).map(s => {
+    const n = Number(s);
+    return Number.isNaN(n) ? null : n;
+  });
+}
+
+function parseReplaceParts(raw) {
+  if (!raw) return [null, null];
+  // najpierw spróbuj rozdzielić po dedykowanych delimiterach
+  let parts = raw.split('->');
+  if (parts.length === 1) parts = raw.split('|');
+  if (parts.length === 1) parts = raw.split('||');
+  if (parts.length === 1 && raw.includes(',')) parts = raw.split(',');
+  // dalej - jeśli mamy jedno element i zawiera spacje, przyjmij pierwszy wyraz jako szukany, reszta jako zamiennik
+  if (parts.length === 1) {
+    const toks = raw.trim().split(/\s+/);
+    if (toks.length === 1) return [toks[0], '']; // tylko szukany - zamiennik pusty
+    const search = toks.shift();
+    const replacement = toks.join(' ');
+    return [search, replacement];
+  }
+  // usuń ewentualne białe znaki na brzegach
+  return [parts[0].trim(), (parts[1] ?? '').trim()];
+}
+
 function runMethod(method) {
-    const text = document.getElementById("textInput").value;
-    const params = document.getElementById("paramInput").value.split(" ");
+  const text = document.getElementById("textInput").value;
+  const raw = document.getElementById("paramInput").value.trim();
+  let result = '';
+  try {
+    switch (method) {
+      case 'length':
+        result = text.length;
+        break;
 
-    let result;
+      case 'charAt': {
+        const idx = parseInt(raw, 10);
+        if (Number.isNaN(idx)) { result = 'Podaj indeks (liczbę)'; break; }
+        result = text.charAt(idx);
+        break;
+      }
 
-    try {
-        switch (method) {
-            case "length":
-                result = text.length;
-                break;
+      case 'charCodeAt': {
+        const idx = parseInt(raw, 10);
+        if (Number.isNaN(idx)) { result = 'Podaj indeks (liczbę)'; break; }
+        const code = text.charCodeAt(idx);
+        result = Number.isNaN(code) ? 'Brak znaku na tej pozycji' : code;
+        break;
+      }
 
-            case "charAt":
-                result = text.charAt(Number(params[0]));
-                break;
+      case 'toUpperCase':
+        result = text.toUpperCase();
+        break;
 
-            case "charCodeAt":
-                result = text.charCodeAt(Number(params[0]));
-                break;
+      case 'toLowerCase':
+        result = text.toLowerCase();
+        break;
 
-            case "toUpperCase":
-                result = text.toUpperCase();
-                break;
+      case 'indexOf':
+        // treat whole raw as needle (including spaces)
+        result = text.indexOf(raw);
+        break;
 
-            case "toLowerCase":
-                result = text.toLowerCase();
-                break;
+      case 'lastIndexOf':
+        result = text.lastIndexOf(raw);
+        break;
 
-            case "indexOf":
-                result = text.indexOf(params.join(" "));
-                break;
+      case 'substr': {
+        // substr(start, length)
+        const nums = parseNumbersFromRaw(raw);
+        const start = (nums[0] === null || nums.length === 0) ? 0 : nums[0];
+        const len = (nums[1] === null || nums[1] === undefined) ? undefined : nums[1];
+        result = (len === undefined) ? text.substr(start) : text.substr(start, len);
+        break;
+      }
 
-            case "lastIndexOf":
-                result = text.lastIndexOf(params.join(" "));
-                break;
+      case 'substring': {
+        const nums = parseNumbersFromRaw(raw);
+        const a = nums[0] ?? 0;
+        const b = (nums[1] === null || nums[1] === undefined) ? undefined : nums[1];
+        result = (b === undefined) ? text.substring(a) : text.substring(a, b);
+        break;
+      }
 
-            case "substr":
-                result = text.substr(Number(params[0]), Number(params[1]));
-                break;
+      case 'slice': {
+        const nums = parseNumbersFromRaw(raw);
+        const a = nums[0] ?? 0;
+        const b = (nums[1] === null || nums[1] === undefined) ? undefined : nums[1];
+        result = (b === undefined) ? text.slice(a) : text.slice(a, b);
+        break;
+      }
 
-            case "substring":
-                result = text.substring(Number(params[0]), Number(params[1]));
-                break;
+      case 'replace': {
+        // support: "old->new", "old|new", or "old new with spaces" (first token = old, rest = new)
+        const [search, replacement] = parseReplaceParts(raw);
+        if (!search) { result = 'Podaj ciąg do zastąpienia i opcjonalnie nowy (np. "kot->pies" lub "kot pies").'; break; }
+        // jeśli user chce regex, mógł wpisać /pattern/flags - ale bez parsowania regex automatycznego dla bezpieczeństwa użyj literalnego
+        result = text.replace(search, replacement);
+        break;
+      }
 
-            case "slice":
-                result = text.slice(Number(params[0]), Number(params[1]));
-                break;
-
-            case "replace":
-                result = text.replace(params[0], params[1] ?? "");
-                break;
-
-            default:
-                result = "Błąd metody";
-        }
-    } catch {
-        result = "Niepoprawne parametry!";
+      default:
+        result = 'Nieznana metoda';
     }
+  } catch (e) {
+    result = 'Błąd wykonania: ' + e.message;
+  }
 
-    document.getElementById("resultTitle").textContent =
-        `metoda ${method}(), wynik:`;
+  // ustaw wyniki i opis
+  document.getElementById("resultTitle").textContent = `metoda ${method}(), wynik:`;
+  document.getElementById("resultValue").textContent = String(result);
 
-    document.getElementById("resultValue").textContent = result;
-
-    // Wstawienie odpowiedniego opisu
-    document.getElementById("descText").textContent = opisy[map[method]];
+  const idxDesc = map[method];
+  if (typeof idxDesc !== 'undefined') {
+    document.getElementById("descText").textContent = opisy[idxDesc];
+  } else {
+    document.getElementById("descText").textContent = '';
+  }
 }

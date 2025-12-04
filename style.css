@@ -1,1 +1,28 @@
-
+.container{
+    margin-top: 1em;
+}
+div{
+    overflow: auto;
+}
+header{
+    margin-bottom: 1em;
+}
+form{
+    padding: .5em 0;
+}
+label{
+    display: block;
+}
+button{
+    width: 8.5em;
+    padding: .5em;
+    display: block;
+    margin: .1em;
+}
+@media (min-width: 768px){
+    #kontener {
+        width: 90%;
+        margin: auto;
+        padding: .5em;
+    }
+}

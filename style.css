@@ -1,28 +1,93 @@
-.container{
-    margin-top: 1em;
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #f5f5f5;
+    text-align: center;
 }
-div{
-    overflow: auto;
+
+h1 {
+    margin-top: 20px;
+    color: #0aa;
+    font-size: 36px;
 }
-header{
-    margin-bottom: 1em;
+
+.panel {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
 }
-form{
-    padding: .5em 0;
+
+.input-box {
+    width: 35%;
+    background: #0b74e4;
+    padding: 20px;
+    border-radius: 4px;
+    color: white;
+    text-align: left;
 }
-label{
+
+.input-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0 15px 0;
+    border-radius: 4px;
+    border: none;
+}
+
+.result-box {
+    width: 60%;
+    background: #0075ff;
+    color: white;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+#resultTitle {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.content {
+    display: flex;
+    padding: 20px;
+}
+
+.buttons {
+    width: 30%;
+    background: #e7eaed;
+    padding: 20px;
+}
+
+.buttons button {
     display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #1ba63f;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
-button{
-    width: 8.5em;
-    padding: .5em;
-    display: block;
-    margin: .1em;
+
+.buttons button:hover {
+    background: #148a33;
 }
-@media (min-width: 768px){
-    #kontener {
-        width: 90%;
-        margin: auto;
-        padding: .5em;
-    }
+
+.description-box {
+    width: 70%;
+    background: #f5b800;
+    padding: 25px;
+    border-radius: 4px;
+}
+
+.description-box h2 {
+    font-size: 28px;
+    color: #d60000;
+}
+
+footer {
+    padding: 20px;
+    color: #009;
 }
